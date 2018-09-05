@@ -52,11 +52,8 @@ const createBotHandler = bot => {
     let replyMsg =
       'WikiBot generates random articles from wikipedia for users to learn something new'
     // If user click the start button
-    if (/\/start/.test(msg.text)) {
+    if (/\/start/.test(msg.text) || /\/page/.test(msg.text)) {
       bot.sendMessage(msg.chat.id, replyMsg)
-      const wikiJSON = await retrieveWikiPage()
-      parseAndReply(msg.chat.id, wikiJSON, bot)
-    } else if (/\/page/.test(msg.text)) {
       const wikiJSON = await retrieveWikiPage()
       parseAndReply(msg.chat.id, wikiJSON, bot)
     } else {
