@@ -1,11 +1,12 @@
 import { retrieveWikiPage } from './wikipedia'
 
-const parseAndReply = (chatId, wikiJSON, bot) => {
+const parseAndReply = (userId, wikiJSON, bot) => {
   const pageArr = wikiJSON.query.pages
   // Get the page ID
   const pageId = Object.keys(pageArr)[0]
   const title = pageArr[pageId].title
   const extract = pageArr[pageId].extract
+  // define the buttons
   const reply_markup = JSON.stringify({
     inline_keyboard: [
       [
@@ -22,21 +23,28 @@ const parseAndReply = (chatId, wikiJSON, bot) => {
       ],
     ],
   })
+  // Set parse mode to html (Allow markups as <b>, <i>, etc)
   const parse_mode = 'html'
   const text = `<b>${title}</b> - ${extract}`
 
+  // Check whether there is any featured image in Wikipedia
   if (pageArr[pageId].thumbnail) {
+    // Get the url of the image
     const url = pageArr[pageId].thumbnail.source
-    // bot.sendMessage(msg.chat.id, extract, { parseMode: 'html' })
     const opts = {
+      // Buttons
       reply_markup,
       caption: text,
+      // Enable html mode
       parse_mode,
     }
-    bot.sendPhoto(chatId, url, opts)
+    // Send photos to user
+    bot.sendPhoto(userId, url, opts)
   } else {
-    bot.sendMessage(chatId, text, {
+    bot.sendMessage(userId, text, {
+      // Buttons
       reply_markup,
+      // Enable html mode
       parse_mode,
     })
   }
@@ -52,12 +60,12 @@ const createBotHandler = bot => {
     let replyMsg =
       'WikiBot generates random articles from wikipedia for users to learn something new'
     // If user click the start button
-    if (/\/start/.test(msg.text) || /\/page/.test(msg.text)) {
-      bot.sendMessage(msg.chat.id, replyMsg)
+    if (/\/start/.test(msg.text)) {
+      await bot.sendMessage(msg.from.id, replyMsg)
       const wikiJSON = await retrieveWikiPage()
-      parseAndReply(msg.chat.id, wikiJSON, bot)
+      parseAndReply(msg.from.id, wikiJSON, bot)
     } else {
-      bot.sendMessage(msg.chat.id, 'Invalid command')
+      await bot.sendMessage(msg.from.id, 'Invalid command')
     }
   })
 }
